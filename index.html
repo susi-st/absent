@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生出缺席記錄</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #urlInput {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        #classSelection, #studentList {
+            display: none;
+        }
+        .class-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .class-options label {
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>學生出缺席記錄</h1>
+    
+    <div id="urlSection">
+        <h2>請貼上學生名單網址：</h2>
+        <input type="text" id="urlInput" placeholder="貼上Google試算表的公開連結">
+    </div>
+    
+    <div id="classSelection">
+        <h2>請選擇班級：</h2>
+        <div class="class-options">
+            <label><input type="radio" name="class" value="701"> 701</label>
+            <label><input type="radio" name="class" value="702"> 702</label>
+            <label><input type="radio" name="class" value="703"> 703</label>
+            <label><input type="radio" name="class" value="704"> 704</label>
+            <label><input type="radio" name="class" value="705"> 705</label>
+        </div>
+        <div class="class-options">
+            <label><input type="radio" name="class" value="706"> 706</label>
+            <label><input type="radio" name="class" value="707"> 707</label>
+            <label><input type="radio" name="class" value="708"> 708</label>
+            <label><input type="radio" name="class" value="709"> 709</label>
+            <label><input type="radio" name="class" value="710"> 710</label>
+        </div>
+        <!-- 重複相似的結構到910 -->
+        <button id="confirmBtn">確定</button>
+    </div>
+    
+    <div id="studentList">
+        <h2>學生名單：</h2>
+        <ul id="students"></ul>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const classSelection = document.getElementById('classSelection');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const studentList = document.getElementById('studentList');
+        const studentsUl = document.getElementById('students');
+
+        urlInput.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                classSelection.style.display = 'block';
+            } else {
+                classSelection.style.display = 'none';
+            }
+        });
+
+        confirmBtn.addEventListener('click', function() {
+            const url = urlInput.value.trim();
+            const selectedClass = document.querySelector('input[name="class"]:checked');
+            
+            if (!url || !selectedClass) {
+                alert('請輸入網址並選擇班級');
+                return;
+            }
+
+            // 這裡應該使用實際的Google Sheets API或其他方法來獲取數據
+            // 為了示範，我們使用PapaParse來解析CSV數據
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    const filteredStudents = results.data.filter(student => student.class === selectedClass.value);
+                    displayStudents(filteredStudents);
+                }
+            });
+        });
+
+        function displayStudents(students) {
+            studentsUl.innerHTML = '';
+            students.forEach(student => {
+                const li = document.createElement('li');
+                li.textContent = `${student.name} (${student.id})`;
+                studentsUl.appendChild(li);
+            });
+            studentList.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
